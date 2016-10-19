@@ -125,7 +125,7 @@
             android:paddingBottom="10dip"
             android:layout_marginRight="20dp"
             android:background="#FF0000"
-            android:text="曾經充寶"
+            android:text="Ever Charged FULL"
             android:id="@+id/btnEverCharged"/>
         <Button
             android:layout_width="wrap_content"
@@ -135,7 +135,7 @@
             android:paddingTop="10dip"
             android:paddingBottom="10dip"
             android:background="#FF0000"
-            android:text="曾經放電到指定範圍"
+            android:text="Ever Discharging"
             android:id="@+id/btnEverDischarge"/>
 
     </LinearLayout>

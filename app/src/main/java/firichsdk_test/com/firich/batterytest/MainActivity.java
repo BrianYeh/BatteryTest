@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.BatteryManager;
@@ -50,8 +51,13 @@ public class MainActivity extends AppCompatActivity {
     boolean mIsEverCharged= false;
     boolean mIsDisChargeToRange = false;
     boolean mCanShutdown= false;
-    int mUpperLimit=60;
-    int mLowerLimit=45;
+    int mUpdateFrequency=5;
+    int mUpperLimit=70;
+    int mLowerLimit=65;
+    boolean mWriteLog=true;
+
+    configItemsUIUtil g_configUIItemsFile;
+    configItemsUIUtil.configItemUI g_configItemUIObject=null;
 
     private boolean bDebugOn = true;
     String strTagUtil = "MainActivity.";
@@ -64,6 +70,22 @@ public class MainActivity extends AppCompatActivity {
             Log.d(strTagUtil, bytTrace);
     }
 
+    private void Load_and_Set_Config()
+    {
+        g_configUIItemsFile = new configItemsUIUtil();
+        g_configUIItemsFile.dom4jXMLParser();
+        if (!g_configUIItemsFile.getParseOK())
+            return;
+        g_configItemUIObject = g_configUIItemsFile.getConfigItemUI("BatteryTest");
+        if (!g_configUIItemsFile.IsConfigExist()) {
+            return;
+        }
+        //set config
+        mUpdateFrequency = g_configItemUIObject.update_frequency;
+        mWriteLog = g_configItemUIObject.write_log;
+        mUpperLimit = g_configItemUIObject.discharging_upper_limit;
+        mLowerLimit = g_configItemUIObject.discharging_lower_limit;
+    }
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context paramAnonymousContext, Intent intent) {
             dump_trace("onReceive:Begin");
@@ -130,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.mTextViewBatteryStatus.setText(mBatterystatus);
                 mTemperature = get_Thermal_Temperature();
                 MainActivity.this.mTextViewThermalTempStatus.setText(mTemperature);
-                int Capacity = current*100;
+                int Capacity = (current*100)/total;
 
                 if (mIsEverCharged){
                     if ( (Capacity >= mLowerLimit) && (Capacity <= mUpperLimit)){
@@ -142,26 +164,26 @@ public class MainActivity extends AppCompatActivity {
                 if ( mIsEverCharged && mIsDisChargeToRange && (Capacity < mLowerLimit)){
                     //shutdown
                     mCanShutdown = true;
-
+                    set_Pre_Power_Off_Status();
                 }
+                //set_Pre_Power_Off_Status(); //test only
                 //mCanShutdown = true;//test only
+                //shutdown_now(); //test only
                 if (mCanShutdown){
-                    Intent i = new Intent("android.intent.action.ACTION_REQUEST_SHUTDOWN");
-                    i.putExtra("android.intent.extra.KEY_CONFIRM", true);
-                    startActivity(i);
+                    shutdown_now();
                 }
-                // 如果当前电量小于总电量的15%
-                /*
-                if (current * 1.0 / total < 0.15) {
-                    sb.append("电量过低，请尽快充电！");
-                } else {
-                    sb.append("电量足够，请放心使用！");
-                }*/
-                //Toast.makeText(context, sb.toString(), Toast.LENGTH_LONG).show();
+
             }
         }
     };
 
+    private void shutdown_now()
+    {
+        Intent i = new Intent("android.intent.action.ACTION_REQUEST_SHUTDOWN");
+        i.putExtra("android.intent.extra.KEY_CONFIRM",false);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        MainActivity.this.startActivity(i);
+    }
     protected void onPause()
     {
         super.onPause();
@@ -201,10 +223,14 @@ public class MainActivity extends AppCompatActivity {
         mHandler = new Handler();
         mHandlerUI = new Handler();
         mHandlerUIButton = new Handler();
-        initBackThread();
+        initLog_and_UIUpdate_BackThread();
+        Load_and_Set_Config();
 
         mtxtLog =(TextView) findViewById(R.id.textViewLog);
         mtxtLog.setText("Log:\n");
+
+        Check_Pre_Power_Off();
+
         mTextViewBatteryCapacity= (TextView)findViewById(R.id.PercentageContent_text);
         mTextViewBatteryStatus= (TextView)findViewById(R.id.BatteryStatusContent_text);
         mTextViewThermalTempStatus= (TextView)findViewById(R.id.ThermalTempContent_text);
@@ -227,6 +253,15 @@ public class MainActivity extends AppCompatActivity {
 
         // Checks the orientation of the screen
         dump_trace("onConfigurationChanged:");
+    }
+
+    private void Check_Pre_Power_Off()
+    {
+        boolean IsPowerOff = get_Pre_Power_Off_Status();
+        TextView mTextViewPrePowerOff = (TextView) findViewById(R.id.PowerOff_text);
+        if (IsPowerOff) {
+            mTextViewPrePowerOff.setText("Pre Power Off");
+        }
     }
 
     /*
@@ -261,7 +296,7 @@ type: contains string description of the sensor, like "ac", "battery",...
 
     }
 
-    private void initBackThread()
+    private void initLog_and_UIUpdate_BackThread()
     {
         mCheckMsgThread = new HandlerThread("check-message-coming");
         mCheckMsgThread.start();
@@ -311,7 +346,11 @@ type: contains string description of the sensor, like "ac", "battery",...
         try
         {
             //模拟耗时
-            Thread.sleep(4000);
+            int UpdateFrequency = mUpdateFrequency-1;
+            if (UpdateFrequency <0){
+                UpdateFrequency=4;
+            }
+            Thread.sleep(UpdateFrequency*1000);
             mHandler.post(new Runnable()
             {
                 @Override
@@ -325,14 +364,16 @@ type: contains string description of the sensor, like "ac", "battery",...
 
                     String LogString ="";
                     LogString = "["+ date +"]" + "; Capacity="+ mBatteryCapacity+ "; Status="+ mBatterystatus +"; Thermal= "+ mTemperature+ "\n";
-                        PostUIUpdateLog(LogString);
+                    PostUIUpdateLog(LogString);
                     if (mIsEverCharged) {
                         PostUIUpdateButton(mBtnEverCharged);
                     }
                     if (mIsDisChargeToRange){
                         PostUIUpdateButton(mBtnEverDisChargeToRange);
                     }
-                    write_Log_to_storage(LogString);
+                    if (mWriteLog) {
+                        write_Log_to_storage(LogString);
+                    }
                 }
             });
 
@@ -437,5 +478,32 @@ http://www.captechconsulting.com/blogs/runtime-permissions-best-practices-and-ho
         }
         reader.close();
         return fileData.toString();
+    }
+    private void set_Pre_Power_Off_Status()
+    {
+        SharedPreferences spref = getPreferences(MODE_PRIVATE);
+
+        //由 SharedPreferences 中取出 Editor 物件，透過 Editor 物件將資料存入
+        SharedPreferences.Editor editor = spref.edit();
+        //清除 SharedPreferences 檔案中所有資料
+        editor.clear();
+        //儲存 boolean 型態的資料
+        editor.putBoolean("KEY_PRE_POWER_OFF", true);
+        //將目前對 SharedPreferences 的異動寫入檔案中
+        //如果沒有呼叫 commit()，則異動的資料不會生效
+        editor.commit();
+    }
+    private boolean get_Pre_Power_Off_Status()
+    {
+        SharedPreferences spref = getPreferences(MODE_PRIVATE);
+        //回傳 KEY_STRING 是否在在 SharedPreferences 檔案中
+        boolean exists = spref.contains("KEY_PRE_POWER_OFF");
+        if (exists){
+            //透過 KEY_BOOL key 取出 boolean 型態的資料，若資料不存在則回傳 true
+            boolean IsPowerOff = spref.getBoolean("KEY_PRE_POWER_OFF", false);
+            return IsPowerOff;
+        }else{
+            return false;
+        }
     }
 }

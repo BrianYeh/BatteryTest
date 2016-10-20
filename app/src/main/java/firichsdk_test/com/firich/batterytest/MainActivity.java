@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
                 if ( mIsEverCharged && mIsDisChargeToRange && (Capacity < mLowerLimit)){
                     //shutdown
                     mCanShutdown = true;
-                    set_Pre_Power_Off_Status();
+                    set_Pre_Power_Off_Status(true);
                 }
                 //set_Pre_Power_Off_Status(); //test only
                 //mCanShutdown = true;//test only
@@ -202,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
         */
     }
     /** Called just before the activity is destroyed. */
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -280,6 +281,7 @@ type: contains string description of the sensor, like "ac", "battery",...
         mIsEverCharged = false;
         mIsDisChargeToRange = false;
         mCanShutdown = false;
+        set_Pre_Power_Off_Status(false);
         mBtnEverCharged.setBackgroundColor(Color.RED);
         mBtnEverDisChargeToRange.setBackgroundColor(Color.RED);
         mTextViewBatteryStatus.setText("");
@@ -479,7 +481,7 @@ http://www.captechconsulting.com/blogs/runtime-permissions-best-practices-and-ho
         reader.close();
         return fileData.toString();
     }
-    private void set_Pre_Power_Off_Status()
+    private void set_Pre_Power_Off_Status(boolean statusPrePowerOfff)
     {
         SharedPreferences spref = getPreferences(MODE_PRIVATE);
 
@@ -488,7 +490,7 @@ http://www.captechconsulting.com/blogs/runtime-permissions-best-practices-and-ho
         //清除 SharedPreferences 檔案中所有資料
         editor.clear();
         //儲存 boolean 型態的資料
-        editor.putBoolean("KEY_PRE_POWER_OFF", true);
+        editor.putBoolean("KEY_PRE_POWER_OFF", statusPrePowerOfff);
         //將目前對 SharedPreferences 的異動寫入檔案中
         //如果沒有呼叫 commit()，則異動的資料不會生效
         editor.commit();

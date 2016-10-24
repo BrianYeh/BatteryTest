@@ -1,22 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="#e2dada">
-    <HorizontalScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent">
-<LinearLayout
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="#e2dada"
-    android:orientation="vertical">
+    android:orientation="vertical" >
 
 
     <LinearLayout
         android:id="@+id/linearLayoutTitle"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="10dip"
         android:paddingRight="10dip"
@@ -35,7 +27,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="10dip"
         android:paddingRight="10dip"
@@ -65,7 +57,7 @@
 
     </LinearLayout>
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="10dip"
         android:paddingRight="10dip"
@@ -119,28 +111,38 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="14sp"
             android:paddingLeft="10dip"
             android:paddingRight="10dip"
             android:paddingTop="10dip"
             android:paddingBottom="10dip"
-            android:layout_marginRight="20dp"
+            android:layout_marginRight="10dp"
             android:background="#FF0000"
             android:text="Ever Charged FULL"
             android:id="@+id/btnEverCharged"/>
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="14sp"
             android:paddingLeft="10dip"
             android:paddingRight="10dip"
             android:paddingTop="10dip"
             android:paddingBottom="10dip"
+            android:layout_marginRight="10dp"
             android:background="#FF0000"
             android:text="Ever Discharging"
             android:id="@+id/btnEverDischarge"/>
+        <TextView
+            android:id="@+id/textViewEverDischargeRange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textColor="#000000"
+            android:text="60-45" />
 
     </LinearLayout>
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="10dip"
         android:paddingRight="10dip"
@@ -171,7 +173,7 @@
             android:text=" " />
     </LinearLayout>
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="10dip"
         android:paddingRight="10dip"
@@ -193,6 +195,4 @@
         </ScrollView>
     </LinearLayout>
 
-</LinearLayout>
-    </HorizontalScrollView>
-</ScrollView>
+    </LinearLayout>

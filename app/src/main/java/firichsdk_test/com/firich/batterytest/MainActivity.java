@@ -232,6 +232,8 @@ public class MainActivity extends AppCompatActivity {
 
         Check_Pre_Power_Off();
 
+        TextView mTextViewDischargingRange =(TextView) findViewById(R.id.textViewEverDischargeRange);
+        mTextViewDischargingRange.setText(mUpperLimit+"% - " + mLowerLimit+"%");
         mTextViewBatteryCapacity= (TextView)findViewById(R.id.PercentageContent_text);
         mTextViewBatteryStatus= (TextView)findViewById(R.id.BatteryStatusContent_text);
         mTextViewThermalTempStatus= (TextView)findViewById(R.id.ThermalTempContent_text);
@@ -338,7 +340,8 @@ type: contains string description of the sensor, like "ac", "battery",...
             {
                 //Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
                 final TextView testViewlog = (TextView) findViewById(R.id.textViewLog);
-                testViewlog.append(msg.toString());
+                testViewlog.setText(msg + testViewlog.getText());
+                //testViewlog.append(msg.toString());
 
             }
         });
@@ -453,9 +456,9 @@ http://www.captechconsulting.com/blogs/runtime-permissions-best-practices-and-ho
         boolean contains_android4 = strVersion.contains("4.4.3 2.0.0-rc2.");
         try {
             if (!contains_android4) {
-                temperature1 = "soc_dts0:" + loadFileAsString("/sys/class/thermal/thermal_zone1/temp");
-                temperature2 = "soc_dts1:" + loadFileAsString("/sys/class/thermal/thermal_zone2/temp");
-                temp = temperature1 + temperature2;
+                temperature1 = "soc_dts0:" + loadFileAsString("/sys/class/thermal/thermal_zone1/temp").trim();
+                temperature2 = "soc_dts1:" + loadFileAsString("/sys/class/thermal/thermal_zone2/temp").trim();
+                temp = temperature1 + "; "+ temperature2;
             }
             if (contains_android4){
                 temp="imx_thermal_zone:"+ loadFileAsString("/sys/class/thermal/thermal_zone0/temp");

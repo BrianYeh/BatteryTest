@@ -368,6 +368,7 @@ type: contains string description of the sensor, like "ac", "battery",...
                     String date = format.format(newdate);
 
                     String LogString ="";
+                    mTemperature = get_Thermal_Temperature(); //Brian: Fixed: Temperatures are not updated.
                     LogString = "["+ date +"]" + "; Capacity="+ mBatteryCapacity+ "; Status="+ mBatterystatus +"; Thermal= "+ mTemperature+ "\n";
                     PostUIUpdateLog(LogString);
                     if (mIsEverCharged) {
